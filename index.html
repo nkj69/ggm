@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>가계부</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      color: #333;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: #2c3e50;
+      color: white;
+      padding: 20px 24px 0;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    header h1 { font-size: 1.4rem; font-weight: 600; }
+
+    #month-nav { display: flex; align-items: center; gap: 12px; }
+    #month-nav button {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: white;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.2s;
+    }
+    #month-nav button:hover { background: rgba(255,255,255,0.3); }
+    #current-month { font-size: 1rem; font-weight: 500; min-width: 100px; text-align: center; }
+
+    /* ── Tab ── */
+    .tabs {
+      display: flex;
+      gap: 4px;
+    }
+
+    .tab-btn {
+      padding: 10px 24px;
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.55);
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .tab-btn.active {
+      color: white;
+      border-bottom-color: #3498db;
+    }
+
+    .tab-btn:hover:not(.active) { color: rgba(255,255,255,0.85); }
+
+    /* ── Page sections ── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── Summary cards ── */
+    .summary {
+      display: flex;
+      gap: 16px;
+      padding: 20px 24px;
+      flex-wrap: wrap;
+    }
+
+    .card {
+      flex: 1;
+      min-width: 160px;
+      background: white;
+      border-radius: 12px;
+      padding: 18px 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .card .label { font-size: 0.78rem; color: #888; margin-bottom: 6px; }
+    .card .amount { font-size: 1.4rem; font-weight: 700; }
+    .card.income .amount { color: #2ecc71; }
+    .card.expense .amount { color: #e74c3c; }
+    .card.balance .amount { color: #2c3e50; }
+
+    /* ── Form ── */
+    .form-section {
+      margin: 0 24px 20px;
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .form-section h2 { font-size: 0.95rem; font-weight: 600; margin-bottom: 14px; color: #555; }
+
+    .form-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .form-row input, .form-row select {
+      padding: 9px 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    .form-row input:focus, .form-row select:focus { border-color: #2c3e50; }
+
+    #input-date { width: 140px; }
+    #input-desc { flex: 1; min-width: 120px; }
+    #input-amount { width: 140px; }
+    #input-type { width: 100px; }
+
+    .form-row button {
+      padding: 9px 20px;
+      background: #2c3e50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+
+    .form-row button:hover { background: #3d5166; }
+
+    /* ── Transaction list ── */
+    .list-section {
+      margin: 0 24px 40px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+
+    .list-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .list-header h2 { font-size: 0.95rem; font-weight: 600; color: #555; }
+
+    #filter-type {
+      padding: 6px 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    thead th {
+      background: #f8f9fa;
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 0.8rem;
+      color: #888;
+      font-weight: 600;
+      border-bottom: 1px solid #eee;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #f5f5f5;
+      transition: background 0.15s;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fafafa; }
+
+    tbody td { padding: 11px 16px; font-size: 0.9rem; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge.income { background: #d5f5e3; color: #27ae60; }
+    .badge.expense { background: #fadbd8; color: #c0392b; }
+
+    .amount-income { color: #27ae60; font-weight: 600; }
+    .amount-expense { color: #c0392b; font-weight: 600; }
+
+    .del-btn {
+      background: none;
+      border: none;
+      color: #ccc;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: color 0.2s;
+    }
+    .del-btn:hover { color: #e74c3c; }
+
+    .empty {
+      text-align: center;
+      padding: 40px;
+      color: #bbb;
+      font-size: 0.9rem;
+    }
+
+    /* ── Statistics page ── */
+    .stat-section {
+      margin: 20px 24px;
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .stat-section h2 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 14px;
+    }
+
+    /* Period preset buttons */
+    .period-presets {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .preset-btn {
+      padding: 6px 14px;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      background: white;
+      font-size: 0.82rem;
+      cursor: pointer;
+      color: #555;
+      transition: all 0.2s;
+    }
+
+    .preset-btn:hover { border-color: #2c3e50; color: #2c3e50; }
+    .preset-btn.active { background: #2c3e50; border-color: #2c3e50; color: white; }
+
+    /* Custom range */
+    .custom-range {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .custom-range input {
+      padding: 7px 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      outline: none;
+    }
+
+    .custom-range input:focus { border-color: #2c3e50; }
+    .custom-range span { color: #999; font-size: 0.9rem; }
+
+    .apply-btn {
+      padding: 7px 16px;
+      background: #2c3e50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .apply-btn:hover { background: #3d5166; }
+
+    /* Stat summary cards */
+    .stat-cards {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .stat-card {
+      flex: 1;
+      min-width: 130px;
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+
+    .stat-card.income  { background: #eafaf1; }
+    .stat-card.expense { background: #fdf2f2; }
+    .stat-card.balance { background: #eaf0fb; }
+
+    .stat-card .sc-label { font-size: 0.75rem; color: #888; margin-bottom: 4px; }
+    .stat-card .sc-amount { font-size: 1.25rem; font-weight: 700; }
+    .stat-card.income  .sc-amount { color: #27ae60; }
+    .stat-card.expense .sc-amount { color: #c0392b; }
+    .stat-card.balance .sc-amount { color: #2980b9; }
+
+    /* Chart */
+    #bar-chart {
+      width: 100%;
+      display: block;
+      margin-top: 4px;
+    }
+
+    /* Monthly breakdown table */
+    .breakdown-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    .breakdown-table th {
+      background: #f8f9fa;
+      padding: 9px 14px;
+      text-align: left;
+      color: #888;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border-bottom: 1px solid #eee;
+    }
+    .breakdown-table td { padding: 10px 14px; border-bottom: 1px solid #f5f5f5; }
+    .breakdown-table tr:last-child td { border-bottom: none; }
+    .breakdown-table .g { color: #27ae60; font-weight: 600; }
+    .breakdown-table .r { color: #c0392b; font-weight: 600; }
+    .breakdown-table .b { color: #2980b9; font-weight: 600; }
+
+    .rate-bar {
+      display: inline-block;
+      height: 6px;
+      border-radius: 3px;
+      vertical-align: middle;
+      margin-left: 6px;
+    }
+
+    @media (max-width: 600px) {
+      .header-top { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .summary, .stat-section { padding: 16px; }
+      .form-section, .list-section, .stat-section { margin: 0 12px 16px; }
+      #input-date, #input-amount, #input-type { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <h1>가계부</h1>
+    <div id="month-nav">
+      <button id="prev-month">&#8249;</button>
+      <span id="current-month"></span>
+      <button id="next-month">&#8250;</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="ledger">내역</button>
+    <button class="tab-btn" data-tab="stats">통계</button>
+  </div>
+</header>
+
+<!-- ══════════ 내역 탭 ══════════ -->
+<div id="page-ledger" class="page active">
+  <div class="summary">
+    <div class="card income">
+      <div class="label">총 수입</div>
+      <div class="amount" id="total-income">₩0</div>
+    </div>
+    <div class="card expense">
+      <div class="label">총 지출</div>
+      <div class="amount" id="total-expense">₩0</div>
+    </div>
+    <div class="card balance">
+      <div class="label">잔액</div>
+      <div class="amount" id="total-balance">₩0</div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <h2>내역 추가</h2>
+    <div class="form-row">
+      <input type="date" id="input-date">
+      <input type="text" id="input-desc" placeholder="내용 (예: 점심식사)">
+      <input type="number" id="input-amount" placeholder="금액" min="0">
+      <select id="input-type">
+        <option value="expense">지출</option>
+        <option value="income">수입</option>
+      </select>
+      <button id="add-btn">추가</button>
+    </div>
+  </div>
+
+  <div class="list-section">
+    <div class="list-header">
+      <h2>거래 내역</h2>
+      <select id="filter-type">
+        <option value="all">전체</option>
+        <option value="income">수입</option>
+        <option value="expense">지출</option>
+      </select>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>날짜</th>
+          <th>내용</th>
+          <th>구분</th>
+          <th>금액</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tx-list"></tbody>
+    </table>
+    <div class="empty" id="empty-msg" style="display:none">이번 달 내역이 없습니다.</div>
+  </div>
+</div>
+
+<!-- ══════════ 통계 탭 ══════════ -->
+<div id="page-stats" class="page">
+
+  <!-- 기간 선택 -->
+  <div class="stat-section">
+    <h2>기간 선택</h2>
+    <div class="period-presets">
+      <button class="preset-btn" data-preset="this-month">이번 달</button>
+      <button class="preset-btn" data-preset="last-month">지난 달</button>
+      <button class="preset-btn" data-preset="3months">최근 3개월</button>
+      <button class="preset-btn" data-preset="6months">최근 6개월</button>
+      <button class="preset-btn" data-preset="this-year">올해</button>
+      <button class="preset-btn active" data-preset="custom">직접 설정</button>
+    </div>
+    <div class="custom-range">
+      <input type="date" id="stat-from">
+      <span>~</span>
+      <input type="date" id="stat-to">
+      <button class="apply-btn" id="apply-range">적용</button>
+    </div>
+  </div>
+
+  <!-- 기간 요약 -->
+  <div class="stat-section">
+    <h2 id="stat-period-label">기간 요약</h2>
+    <div class="stat-cards">
+      <div class="stat-card income">
+        <div class="sc-label">총 수입</div>
+        <div class="sc-amount" id="s-income">₩0</div>
+      </div>
+      <div class="stat-card expense">
+        <div class="sc-label">총 지출</div>
+        <div class="sc-amount" id="s-expense">₩0</div>
+      </div>
+      <div class="stat-card balance">
+        <div class="sc-label">순이익</div>
+        <div class="sc-amount" id="s-balance">₩0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 월별 추이 차트 -->
+  <div class="stat-section">
+    <h2>월별 수입 · 지출 추이</h2>
+    <canvas id="bar-chart" height="220"></canvas>
+    <div class="empty" id="chart-empty" style="display:none">데이터가 없습니다.</div>
+  </div>
+
+  <!-- 월별 상세 -->
+  <div class="stat-section" style="margin-bottom:40px">
+    <h2>월별 상세</h2>
+    <table class="breakdown-table">
+      <thead>
+        <tr>
+          <th>월</th>
+          <th>수입</th>
+          <th>지출</th>
+          <th>순이익</th>
+          <th>지출 비율</th>
+        </tr>
+      </thead>
+      <tbody id="breakdown-body"></tbody>
+    </table>
+    <div class="empty" id="breakdown-empty" style="display:none">데이터가 없습니다.</div>
+  </div>
+</div>
+
+<script>
+  /* ── Storage ── */
+  const STORAGE_KEY = 'ggm_transactions';
+  let transactions = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+
+  /* ── Month state (내역 탭) ── */
+  let currentYear, currentMonth;
+
+  function initMonth() {
+    const now = new Date();
+    currentYear = now.getFullYear();
+    currentMonth = now.getMonth() + 1;
+  }
+
+  /* ── Helpers ── */
+  function fmt(n) { return '₩' + Math.abs(n).toLocaleString('ko-KR'); }
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions)); }
+
+  function isoToday() { return new Date().toISOString().split('T')[0]; }
+
+  function addMonths(dateStr, n) {
+    const d = new Date(dateStr);
+    d.setMonth(d.getMonth() + n);
+    return d.toISOString().split('T')[0];
+  }
+
+  function monthStart(y, m) { return `${y}-${String(m).padStart(2,'0')}-01`; }
+  function monthEnd(y, m) {
+    const d = new Date(y, m, 0);
+    return `${y}-${String(m).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  /* ── Tab switching ── */
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('page-' + btn.dataset.tab).classList.add('active');
+
+      // 월별 네비는 내역 탭에서만 의미 있음
+      document.getElementById('month-nav').style.visibility =
+        btn.dataset.tab === 'ledger' ? 'visible' : 'hidden';
+
+      if (btn.dataset.tab === 'stats') renderStats();
+    });
+  });
+
+  /* ════════════════════════════════
+     내역 탭
+  ════════════════════════════════ */
+  function getMonthTx() {
+    return transactions.filter(t => {
+      const [y, m] = t.date.split('-').map(Number);
+      return y === currentYear && m === currentMonth;
+    });
+  }
+
+  function render() {
+    document.getElementById('current-month').textContent =
+      `${currentYear}년 ${currentMonth}월`;
+
+    const filter = document.getElementById('filter-type').value;
+    const monthTx = getMonthTx();
+
+    const income  = monthTx.filter(t => t.type === 'income').reduce((s,t) => s+t.amount, 0);
+    const expense = monthTx.filter(t => t.type === 'expense').reduce((s,t) => s+t.amount, 0);
+
+    document.getElementById('total-income').textContent  = fmt(income);
+    document.getElementById('total-expense').textContent = fmt(expense);
+
+    const bal = document.getElementById('total-balance');
+    const balance = income - expense;
+    bal.textContent  = (balance < 0 ? '-' : '') + fmt(balance);
+    bal.style.color  = balance < 0 ? '#e74c3c' : '#2c3e50';
+
+    const filtered = (filter === 'all' ? monthTx : monthTx.filter(t => t.type === filter))
+      .sort((a,b) => b.date.localeCompare(a.date));
+
+    const tbody = document.getElementById('tx-list');
+    tbody.innerHTML = '';
+
+    if (filtered.length === 0) {
+      document.getElementById('empty-msg').style.display = 'block';
+    } else {
+      document.getElementById('empty-msg').style.display = 'none';
+      filtered.forEach(t => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${t.date}</td>
+          <td>${escHtml(t.desc)}</td>
+          <td><span class="badge ${t.type}">${t.type === 'income' ? '수입' : '지출'}</span></td>
+          <td class="amount-${t.type}">${t.type === 'expense' ? '-' : '+'}${fmt(t.amount)}</td>
+          <td><button class="del-btn" data-id="${t.id}" title="삭제">✕</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+  }
+
+  document.getElementById('add-btn').addEventListener('click', () => {
+    const date   = document.getElementById('input-date').value;
+    const desc   = document.getElementById('input-desc').value.trim();
+    const amount = parseInt(document.getElementById('input-amount').value, 10);
+    const type   = document.getElementById('input-type').value;
+
+    if (!date)              { alert('날짜를 선택하세요.'); return; }
+    if (!desc)              { alert('내용을 입력하세요.'); return; }
+    if (!amount || amount <= 0) { alert('올바른 금액을 입력하세요.'); return; }
+
+    transactions.push({ id: Date.now(), date, desc, amount, type });
+    save();
+
+    document.getElementById('input-desc').value   = '';
+    document.getElementById('input-amount').value = '';
+
+    const [y, m] = date.split('-').map(Number);
+    currentYear  = y;
+    currentMonth = m;
+    render();
+  });
+
+  document.getElementById('tx-list').addEventListener('click', e => {
+    if (!e.target.classList.contains('del-btn')) return;
+    if (!confirm('삭제하시겠습니까?')) return;
+    transactions = transactions.filter(t => t.id !== Number(e.target.dataset.id));
+    save();
+    render();
+  });
+
+  document.getElementById('prev-month').addEventListener('click', () => {
+    if (--currentMonth < 1) { currentMonth = 12; currentYear--; }
+    render();
+  });
+
+  document.getElementById('next-month').addEventListener('click', () => {
+    if (++currentMonth > 12) { currentMonth = 1; currentYear++; }
+    render();
+  });
+
+  document.getElementById('filter-type').addEventListener('change', render);
+
+  /* ════════════════════════════════
+     통계 탭
+  ════════════════════════════════ */
+  let statFrom = '', statTo = '';
+
+  function applyPreset(preset) {
+    const today = isoToday();
+    const now   = new Date();
+    const y     = now.getFullYear();
+    const m     = now.getMonth() + 1;
+
+    if (preset === 'this-month') {
+      statFrom = monthStart(y, m);
+      statTo   = monthEnd(y, m);
+    } else if (preset === 'last-month') {
+      const lm = m === 1 ? 12 : m - 1;
+      const ly = m === 1 ? y - 1 : y;
+      statFrom = monthStart(ly, lm);
+      statTo   = monthEnd(ly, lm);
+    } else if (preset === '3months') {
+      statFrom = addMonths(monthStart(y, m), -2);
+      statTo   = monthEnd(y, m);
+    } else if (preset === '6months') {
+      statFrom = addMonths(monthStart(y, m), -5);
+      statTo   = monthEnd(y, m);
+    } else if (preset === 'this-year') {
+      statFrom = `${y}-01-01`;
+      statTo   = `${y}-12-31`;
+    } else {
+      // custom — just sync inputs
+    }
+
+    document.getElementById('stat-from').value = statFrom;
+    document.getElementById('stat-to').value   = statTo;
+    renderStats();
+  }
+
+  document.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyPreset(btn.dataset.preset);
+    });
+  });
+
+  document.getElementById('apply-range').addEventListener('click', () => {
+    const f = document.getElementById('stat-from').value;
+    const t = document.getElementById('stat-to').value;
+    if (!f || !t) { alert('시작일과 종료일을 모두 선택하세요.'); return; }
+    if (f > t)    { alert('시작일이 종료일보다 늦을 수 없습니다.'); return; }
+    statFrom = f;
+    statTo   = t;
+    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-preset="custom"]').classList.add('active');
+    renderStats();
+  });
+
+  /* ── Build month list between two ISO date strings ── */
+  function monthsBetween(from, to) {
+    const months = [];
+    let [y, m] = from.split('-').map(Number);
+    const [ty, tm] = to.split('-').map(Number);
+    while (y < ty || (y === ty && m <= tm)) {
+      months.push({ y, m });
+      if (++m > 12) { m = 1; y++; }
+    }
+    return months;
+  }
+
+  /* ── Main stats renderer ── */
+  function renderStats() {
+    if (!statFrom || !statTo) return;
+
+    const from = statFrom;
+    const to   = statTo;
+
+    document.getElementById('stat-period-label').textContent =
+      `기간 요약  (${from} ~ ${to})`;
+
+    const inRange = transactions.filter(t => t.date >= from && t.date <= to);
+
+    const totalIncome  = inRange.filter(t => t.type === 'income').reduce((s,t) => s+t.amount, 0);
+    const totalExpense = inRange.filter(t => t.type === 'expense').reduce((s,t) => s+t.amount, 0);
+    const totalBalance = totalIncome - totalExpense;
+
+    document.getElementById('s-income').textContent  = fmt(totalIncome);
+    document.getElementById('s-expense').textContent = fmt(totalExpense);
+    const sb = document.getElementById('s-balance');
+    sb.textContent = (totalBalance < 0 ? '-' : '') + fmt(totalBalance);
+    sb.style.color = totalBalance < 0 ? '#c0392b' : '#2980b9';
+
+    // 월별 집계
+    const months = monthsBetween(from, to);
+    const byMonth = months.map(({y, m}) => {
+      const ms = monthStart(y, m);
+      const me = monthEnd(y, m);
+      const tx = inRange.filter(t => t.date >= ms && t.date <= me);
+      const inc = tx.filter(t => t.type === 'income').reduce((s,t) => s+t.amount, 0);
+      const exp = tx.filter(t => t.type === 'expense').reduce((s,t) => s+t.amount, 0);
+      return { label: `${y}.${String(m).padStart(2,'0')}`, inc, exp, bal: inc - exp };
+    });
+
+    drawBarChart(byMonth);
+    renderBreakdown(byMonth);
+  }
+
+  /* ── Canvas bar chart ── */
+  function drawBarChart(data) {
+    const canvas = document.getElementById('bar-chart');
+    const empty  = document.getElementById('chart-empty');
+
+    if (!data.length || data.every(d => d.inc === 0 && d.exp === 0)) {
+      canvas.style.display = 'none';
+      empty.style.display  = 'block';
+      return;
+    }
+    canvas.style.display = 'block';
+    empty.style.display  = 'none';
+
+    const dpr = window.devicePixelRatio || 1;
+    const W   = canvas.parentElement.clientWidth - 40;
+    const H   = 220;
+    canvas.width  = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width  = W + 'px';
+    canvas.style.height = H + 'px';
+
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    const PAD_L = 70, PAD_R = 16, PAD_T = 16, PAD_B = 36;
+    const chartW = W - PAD_L - PAD_R;
+    const chartH = H - PAD_T - PAD_B;
+
+    const maxVal = Math.max(...data.map(d => Math.max(d.inc, d.exp)), 1);
+    const n = data.length;
+    const groupW = chartW / n;
+    const barW   = Math.min(groupW * 0.3, 28);
+    const gap    = barW * 0.4;
+
+    /* grid lines */
+    ctx.strokeStyle = '#eee';
+    ctx.lineWidth = 1;
+    const gridLines = 4;
+    for (let i = 0; i <= gridLines; i++) {
+      const y = PAD_T + chartH - (chartH * i / gridLines);
+      ctx.beginPath(); ctx.moveTo(PAD_L, y); ctx.lineTo(PAD_L + chartW, y); ctx.stroke();
+      ctx.fillStyle = '#aaa';
+      ctx.font = `${11 * dpr / dpr}px 'Segoe UI', sans-serif`;
+      ctx.textAlign = 'right';
+      ctx.fillText(shortNum(maxVal * i / gridLines), PAD_L - 6, y + 4);
+    }
+
+    /* bars */
+    data.forEach((d, i) => {
+      const cx = PAD_L + groupW * i + groupW / 2;
+
+      // income bar
+      const ih = d.inc / maxVal * chartH;
+      ctx.fillStyle = '#2ecc71';
+      ctx.beginPath();
+      ctx.roundRect(cx - gap/2 - barW, PAD_T + chartH - ih, barW, ih, [3,3,0,0]);
+      ctx.fill();
+
+      // expense bar
+      const eh = d.exp / maxVal * chartH;
+      ctx.fillStyle = '#e74c3c';
+      ctx.beginPath();
+      ctx.roundRect(cx + gap/2, PAD_T + chartH - eh, barW, eh, [3,3,0,0]);
+      ctx.fill();
+
+      // x label
+      ctx.fillStyle = '#888';
+      ctx.font = `${10}px 'Segoe UI', sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText(d.label, cx, PAD_T + chartH + 20);
+    });
+
+    /* legend */
+    const lx = PAD_L;
+    const ly = PAD_T + chartH + 32;
+    [[  '#2ecc71', '수입'], ['#e74c3c', '지출']].forEach(([color, label], i) => {
+      const x = lx + i * 70;
+      ctx.fillStyle = color;
+      ctx.fillRect(x, ly - 10, 12, 10);
+      ctx.fillStyle = '#555';
+      ctx.font = `11px 'Segoe UI', sans-serif`;
+      ctx.textAlign = 'left';
+      ctx.fillText(label, x + 16, ly);
+    });
+  }
+
+  function shortNum(n) {
+    if (n >= 100000000) return (n/100000000).toFixed(1) + '억';
+    if (n >= 10000)     return (n/10000).toFixed(0) + '만';
+    return n.toLocaleString('ko-KR');
+  }
+
+  /* ── Monthly breakdown table ── */
+  function renderBreakdown(data) {
+    const tbody = document.getElementById('breakdown-body');
+    const empty  = document.getElementById('breakdown-empty');
+    tbody.innerHTML = '';
+
+    if (!data.length) {
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    const maxExp = Math.max(...data.map(d => d.exp), 1);
+
+    data.slice().reverse().forEach(d => {
+      const rate   = d.inc > 0 ? Math.round(d.exp / d.inc * 100) : (d.exp > 0 ? 100 : 0);
+      const barW   = Math.round(d.exp / maxExp * 80);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${d.label}</td>
+        <td class="g">+${fmt(d.inc)}</td>
+        <td class="r">-${fmt(d.exp)}</td>
+        <td class="${d.bal >= 0 ? 'b' : 'r'}">${d.bal >= 0 ? '+' : '-'}${fmt(d.bal)}</td>
+        <td>
+          <span style="font-size:0.82rem;color:#888">${rate}%</span>
+          <span class="rate-bar" style="width:${barW}px;background:#fadbd8;"></span>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  /* ── Init ── */
+  const today = isoToday();
+  document.getElementById('input-date').value = today;
+
+  // 통계 기본값: 최근 3개월
+  (() => {
+    const now = new Date();
+    const y = now.getFullYear(), m = now.getMonth() + 1;
+    statFrom = addMonths(monthStart(y, m), -2);
+    statTo   = monthEnd(y, m);
+    document.getElementById('stat-from').value = statFrom;
+    document.getElementById('stat-to').value   = statTo;
+    document.querySelector('[data-preset="3months"]').classList.add('active');
+    document.querySelector('[data-preset="custom"]').classList.remove('active');
+  })();
+
+  initMonth();
+  render();
+</script>
+</body>
+</html>
