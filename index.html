@@ -3,23 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>가계부</title>
+  <title>🌸 가계부</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f0f4f8;
-      color: #333;
+      font-family: 'Nunito', 'Noto Sans KR', sans-serif;
+      background: #fff5f9;
+      background-image:
+        radial-gradient(circle, #ffb7d5 1.5px, transparent 1.5px),
+        radial-gradient(circle, #b5e8f7 1.5px, transparent 1.5px);
+      background-size: 32px 32px, 32px 32px;
+      background-position: 0 0, 16px 16px;
+      color: #5a4060;
       min-height: 100vh;
     }
 
     /* ── Header ── */
     header {
-      background: #2c3e50;
+      background: linear-gradient(135deg, #ff85b3 0%, #c084fc 50%, #60a5fa 100%);
       color: white;
       padding: 20px 24px 0;
+      box-shadow: 0 4px 20px rgba(192,132,252,0.35);
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: '🌸✨🍭🌈🎀⭐🌷💫';
+      position: absolute;
+      top: 6px; right: 16px;
+      font-size: 1.1rem;
+      letter-spacing: 4px;
+      opacity: 0.5;
+      pointer-events: none;
     }
 
     .header-top {
@@ -29,46 +48,47 @@
       margin-bottom: 16px;
     }
 
-    header h1 { font-size: 1.4rem; font-weight: 600; }
+    header h1 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: white;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      letter-spacing: 1px;
+    }
 
     #month-nav { display: flex; align-items: center; gap: 12px; }
     #month-nav button {
-      background: rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.3);
       border: none;
       color: white;
       width: 32px; height: 32px;
       border-radius: 50%;
       cursor: pointer;
       font-size: 1rem;
-      transition: background 0.2s;
+      transition: all 0.2s;
+      backdrop-filter: blur(4px);
     }
-    #month-nav button:hover { background: rgba(255,255,255,0.3); }
-    #current-month { font-size: 1rem; font-weight: 500; min-width: 100px; text-align: center; }
+    #month-nav button:hover { background: rgba(255,255,255,0.5); transform: scale(1.1); }
+    #current-month { font-size: 1rem; font-weight: 700; min-width: 100px; text-align: center; color: white; }
 
     /* ── Tab ── */
-    .tabs {
-      display: flex;
-      gap: 4px;
-    }
+    .tabs { display: flex; gap: 4px; }
 
     .tab-btn {
       padding: 10px 24px;
       background: none;
       border: none;
-      color: rgba(255,255,255,0.55);
+      color: rgba(255,255,255,0.65);
       font-size: 0.95rem;
-      font-weight: 500;
+      font-weight: 700;
       cursor: pointer;
       border-bottom: 3px solid transparent;
       transition: color 0.2s, border-color 0.2s;
+      font-family: 'Nunito', 'Noto Sans KR', sans-serif;
     }
 
-    .tab-btn.active {
-      color: white;
-      border-bottom-color: #3498db;
-    }
-
-    .tab-btn:hover:not(.active) { color: rgba(255,255,255,0.85); }
+    .tab-btn.active { color: white; border-bottom-color: white; }
+    .tab-btn:hover:not(.active) { color: rgba(255,255,255,0.88); }
 
     /* ── Page sections ── */
     .page { display: none; }
@@ -86,44 +106,58 @@
       flex: 1;
       min-width: 160px;
       background: white;
-      border-radius: 12px;
+      border-radius: 20px;
       padding: 18px 20px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 16px rgba(192,132,252,0.15);
+      border: 2px solid transparent;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(192,132,252,0.25); }
 
-    .card .label { font-size: 0.78rem; color: #888; margin-bottom: 6px; }
-    .card .amount { font-size: 1.4rem; font-weight: 700; }
-    .card.income .amount { color: #2ecc71; }
-    .card.expense .amount { color: #e74c3c; }
-    .card.balance .amount { color: #2c3e50; }
+    .card .label { font-size: 0.75rem; color: #b09ac0; margin-bottom: 6px; font-weight: 700; }
+    .card .amount { font-size: 1.4rem; font-weight: 800; }
+    .card.income  { border-color: #bbf7d0; }
+    .card.expense { border-color: #fecdd3; }
+    .card.balance { border-color: #e9d5ff; }
+    .card.income  .amount { color: #22c55e; }
+    .card.expense .amount { color: #f43f5e; }
+    .card.balance .amount { color: #a855f7; }
 
     /* ── Form ── */
     .form-section {
       margin: 0 24px 20px;
       background: white;
-      border-radius: 12px;
+      border-radius: 20px;
       padding: 20px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 16px rgba(192,132,252,0.12);
     }
 
-    .form-section h2 { font-size: 0.95rem; font-weight: 600; margin-bottom: 14px; color: #555; }
-
-    .form-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+    .form-section h2 {
+      font-size: 0.9rem;
+      font-weight: 800;
+      margin-bottom: 14px;
+      color: #c084fc;
     }
+
+    .form-row { display: flex; gap: 10px; flex-wrap: wrap; }
 
     .form-row input, .form-row select {
-      padding: 9px 12px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
+      padding: 9px 14px;
+      border: 2px solid #f0e6ff;
+      border-radius: 12px;
       font-size: 0.9rem;
+      font-family: 'Nunito', 'Noto Sans KR', sans-serif;
+      color: #5a4060;
+      background: #fdf8ff;
       outline: none;
-      transition: border 0.2s;
+      transition: border 0.2s, box-shadow 0.2s;
     }
-
-    .form-row input:focus, .form-row select:focus { border-color: #2c3e50; }
+    .form-row input::placeholder { color: #d0b8e8; }
+    .form-row input:focus, .form-row select:focus {
+      border-color: #c084fc;
+      box-shadow: 0 0 0 3px rgba(192,132,252,0.15);
+      background: white;
+    }
 
     #input-date { width: 140px; }
     #input-desc { flex: 1; min-width: 120px; }
@@ -131,25 +165,31 @@
     #input-type { width: 100px; }
 
     .form-row button {
-      padding: 9px 20px;
-      background: #2c3e50;
+      padding: 9px 22px;
+      background: linear-gradient(135deg, #f472b6, #c084fc);
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 12px;
       font-size: 0.9rem;
+      font-weight: 800;
+      font-family: 'Nunito', 'Noto Sans KR', sans-serif;
       cursor: pointer;
       white-space: nowrap;
-      transition: background 0.2s;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(244,114,182,0.35);
     }
-
-    .form-row button:hover { background: #3d5166; }
+    .form-row button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(244,114,182,0.45);
+    }
+    .form-row button:active { transform: scale(0.97); }
 
     /* ── Transaction list ── */
     .list-section {
       margin: 0 24px 40px;
       background: white;
-      border-radius: 12px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      border-radius: 20px;
+      box-shadow: 0 4px 16px rgba(192,132,252,0.12);
       overflow: hidden;
     }
 
@@ -158,89 +198,92 @@
       justify-content: space-between;
       align-items: center;
       padding: 16px 20px;
-      border-bottom: 1px solid #f0f0f0;
+      border-bottom: 2px solid #fdf0ff;
+      background: linear-gradient(135deg, #fdf4ff, #fff5fb);
     }
 
-    .list-header h2 { font-size: 0.95rem; font-weight: 600; color: #555; }
+    .list-header h2 { font-size: 0.9rem; font-weight: 800; color: #c084fc; }
 
     #filter-type {
       padding: 6px 10px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
+      border: 2px solid #f0e6ff;
+      border-radius: 10px;
       font-size: 0.85rem;
+      font-family: 'Nunito', 'Noto Sans KR', sans-serif;
+      color: #5a4060;
+      background: white;
       outline: none;
     }
 
     table { width: 100%; border-collapse: collapse; }
 
     thead th {
-      background: #f8f9fa;
+      background: #fdf4ff;
       padding: 10px 16px;
       text-align: left;
-      font-size: 0.8rem;
-      color: #888;
-      font-weight: 600;
-      border-bottom: 1px solid #eee;
+      font-size: 0.78rem;
+      color: #c084fc;
+      font-weight: 800;
+      border-bottom: 2px solid #f0e6ff;
     }
 
     tbody tr {
-      border-bottom: 1px solid #f5f5f5;
+      border-bottom: 1px solid #fdf0ff;
       transition: background 0.15s;
     }
-
     tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: #fafafa; }
+    tbody tr:hover { background: #fdf8ff; }
 
-    tbody td { padding: 11px 16px; font-size: 0.9rem; }
+    tbody td { padding: 11px 16px; font-size: 0.9rem; color: #6b5080; }
 
     .badge {
       display: inline-block;
-      padding: 2px 8px;
+      padding: 3px 10px;
       border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
+      font-size: 0.73rem;
+      font-weight: 800;
     }
+    .badge.income  { background: #dcfce7; color: #16a34a; }
+    .badge.expense { background: #ffe4e6; color: #e11d48; }
 
-    .badge.income { background: #d5f5e3; color: #27ae60; }
-    .badge.expense { background: #fadbd8; color: #c0392b; }
-
-    .amount-income { color: #27ae60; font-weight: 600; }
-    .amount-expense { color: #c0392b; font-weight: 600; }
+    .amount-income  { color: #22c55e; font-weight: 700; }
+    .amount-expense { color: #f43f5e; font-weight: 700; }
 
     .del-btn {
       background: none;
       border: none;
-      color: #ccc;
+      color: #e0c8f0;
       cursor: pointer;
       font-size: 1rem;
-      transition: color 0.2s;
+      transition: color 0.2s, transform 0.15s;
     }
-    .del-btn:hover { color: #e74c3c; }
+    .del-btn:hover { color: #f43f5e; transform: scale(1.2); }
 
     .empty {
       text-align: center;
       padding: 40px;
-      color: #bbb;
+      color: #d0b8e8;
       font-size: 0.9rem;
+      font-weight: 600;
     }
+    .empty::before { content: '🌸 '; }
 
     /* ── Statistics page ── */
     .stat-section {
       margin: 20px 24px;
       background: white;
-      border-radius: 12px;
+      border-radius: 20px;
       padding: 20px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 16px rgba(192,132,252,0.12);
     }
 
     .stat-section h2 {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: #555;
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: #c084fc;
       margin-bottom: 14px;
     }
 
-    /* Period preset buttons */
     .period-presets {
       display: flex;
       gap: 8px;
@@ -250,19 +293,19 @@
 
     .preset-btn {
       padding: 6px 14px;
-      border: 1px solid #ddd;
+      border: 2px solid #f0e6ff;
       border-radius: 20px;
       background: white;
       font-size: 0.82rem;
+      font-weight: 700;
+      font-family: 'Nunito', 'Noto Sans KR', sans-serif;
       cursor: pointer;
-      color: #555;
+      color: #c084fc;
       transition: all 0.2s;
     }
+    .preset-btn:hover { border-color: #c084fc; background: #fdf4ff; }
+    .preset-btn.active { background: linear-gradient(135deg, #f472b6, #c084fc); border-color: transparent; color: white; box-shadow: 0 3px 10px rgba(192,132,252,0.3); }
 
-    .preset-btn:hover { border-color: #2c3e50; color: #2c3e50; }
-    .preset-btn.active { background: #2c3e50; border-color: #2c3e50; color: white; }
-
-    /* Custom range */
     .custom-range {
       display: flex;
       align-items: center;
@@ -272,74 +315,68 @@
 
     .custom-range input {
       padding: 7px 10px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
+      border: 2px solid #f0e6ff;
+      border-radius: 12px;
       font-size: 0.88rem;
+      font-family: 'Nunito', 'Noto Sans KR', sans-serif;
+      color: #5a4060;
+      background: #fdf8ff;
       outline: none;
     }
-
-    .custom-range input:focus { border-color: #2c3e50; }
-    .custom-range span { color: #999; font-size: 0.9rem; }
+    .custom-range input:focus { border-color: #c084fc; }
+    .custom-range span { color: #d0b8e8; font-size: 0.9rem; font-weight: 700; }
 
     .apply-btn {
       padding: 7px 16px;
-      background: #2c3e50;
+      background: linear-gradient(135deg, #f472b6, #c084fc);
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 12px;
       font-size: 0.88rem;
+      font-weight: 800;
+      font-family: 'Nunito', 'Noto Sans KR', sans-serif;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.2s;
+      box-shadow: 0 3px 10px rgba(192,132,252,0.3);
     }
-    .apply-btn:hover { background: #3d5166; }
+    .apply-btn:hover { transform: translateY(-1px); box-shadow: 0 5px 14px rgba(192,132,252,0.4); }
 
-    /* Stat summary cards */
-    .stat-cards {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
+    .stat-cards { display: flex; gap: 12px; flex-wrap: wrap; }
 
     .stat-card {
       flex: 1;
       min-width: 130px;
-      border-radius: 10px;
+      border-radius: 16px;
       padding: 14px 16px;
     }
+    .stat-card.income  { background: linear-gradient(135deg, #f0fdf4, #dcfce7); }
+    .stat-card.expense { background: linear-gradient(135deg, #fff1f2, #ffe4e6); }
+    .stat-card.balance { background: linear-gradient(135deg, #faf5ff, #ede9fe); }
 
-    .stat-card.income  { background: #eafaf1; }
-    .stat-card.expense { background: #fdf2f2; }
-    .stat-card.balance { background: #eaf0fb; }
+    .stat-card .sc-label { font-size: 0.72rem; color: #b09ac0; margin-bottom: 4px; font-weight: 700; }
+    .stat-card .sc-amount { font-size: 1.25rem; font-weight: 800; }
+    .stat-card.income  .sc-amount { color: #22c55e; }
+    .stat-card.expense .sc-amount { color: #f43f5e; }
+    .stat-card.balance .sc-amount { color: #a855f7; }
 
-    .stat-card .sc-label { font-size: 0.75rem; color: #888; margin-bottom: 4px; }
-    .stat-card .sc-amount { font-size: 1.25rem; font-weight: 700; }
-    .stat-card.income  .sc-amount { color: #27ae60; }
-    .stat-card.expense .sc-amount { color: #c0392b; }
-    .stat-card.balance .sc-amount { color: #2980b9; }
+    #bar-chart { width: 100%; display: block; margin-top: 4px; }
 
-    /* Chart */
-    #bar-chart {
-      width: 100%;
-      display: block;
-      margin-top: 4px;
-    }
-
-    /* Monthly breakdown table */
     .breakdown-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
     .breakdown-table th {
-      background: #f8f9fa;
+      background: #fdf4ff;
       padding: 9px 14px;
       text-align: left;
-      color: #888;
-      font-size: 0.78rem;
-      font-weight: 600;
-      border-bottom: 1px solid #eee;
+      color: #c084fc;
+      font-size: 0.76rem;
+      font-weight: 800;
+      border-bottom: 2px solid #f0e6ff;
     }
-    .breakdown-table td { padding: 10px 14px; border-bottom: 1px solid #f5f5f5; }
+    .breakdown-table td { padding: 10px 14px; border-bottom: 1px solid #fdf0ff; color: #6b5080; }
     .breakdown-table tr:last-child td { border-bottom: none; }
-    .breakdown-table .g { color: #27ae60; font-weight: 600; }
-    .breakdown-table .r { color: #c0392b; font-weight: 600; }
-    .breakdown-table .b { color: #2980b9; font-weight: 600; }
+    .breakdown-table tr:hover td { background: #fdf8ff; }
+    .breakdown-table .g { color: #22c55e; font-weight: 700; }
+    .breakdown-table .r { color: #f43f5e; font-weight: 700; }
+    .breakdown-table .b { color: #a855f7; font-weight: 700; }
 
     .rate-bar {
       display: inline-block;
@@ -348,6 +385,11 @@
       vertical-align: middle;
       margin-left: 6px;
     }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #fdf4ff; }
+    ::-webkit-scrollbar-thumb { background: #e9d5ff; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #c084fc; }
 
     @media (max-width: 600px) {
       .header-top { flex-direction: column; align-items: flex-start; gap: 10px; }
@@ -361,7 +403,7 @@
 
 <header>
   <div class="header-top">
-    <h1>가계부</h1>
+    <h1>🌸 가계부</h1>
     <div id="month-nav">
       <button id="prev-month">&#8249;</button>
       <span id="current-month"></span>
@@ -401,7 +443,7 @@
         <option value="expense">지출</option>
         <option value="income">수입</option>
       </select>
-      <button id="add-btn">추가</button>
+      <button id="add-btn">✨ 추가</button>
     </div>
   </div>
 
