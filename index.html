@@ -160,9 +160,10 @@
     }
 
     #input-date { width: 140px; }
+    #input-type { width: 90px; }
+    #input-category { width: 140px; }
     #input-desc { flex: 1; min-width: 120px; }
-    #input-amount { width: 140px; }
-    #input-type { width: 100px; }
+    #input-amount { width: 130px; }
 
     .form-row button {
       padding: 9px 22px;
@@ -437,12 +438,13 @@
     <h2>내역 추가</h2>
     <div class="form-row">
       <input type="date" id="input-date">
-      <input type="text" id="input-desc" placeholder="내용 (예: 점심식사)">
-      <input type="number" id="input-amount" placeholder="금액" min="0">
       <select id="input-type">
         <option value="expense">지출</option>
         <option value="income">수입</option>
       </select>
+      <select id="input-category"></select>
+      <input type="text" id="input-desc" placeholder="내용 (예: 점심식사)">
+      <input type="number" id="input-amount" placeholder="금액" min="0">
       <button id="add-btn">✨ 추가</button>
     </div>
   </div>
@@ -462,6 +464,7 @@
           <th>날짜</th>
           <th>내용</th>
           <th>구분</th>
+          <th>유형</th>
           <th>금액</th>
           <th></th>
         </tr>
@@ -563,10 +566,21 @@
     return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+  /* ── 카테고리 옵션 ── */
+  const CATEGORIES = {
+    expense: ['🍱 식비','☕ 카페/음료','🚌 교통','🛍️ 쇼핑','💊 의료/건강','🎬 문화/여가','📱 구독/통신','🏠 주거/생활','📚 교육','📦 기타'],
+    income:  ['💼 급여','💻 부업/프리랜서','📈 투자/배당','💝 용돈','💰 환급/보상','📦 기타']
+  };
+
+  function updateCategoryOptions(type) {
+    const sel = document.getElementById('input-category');
+    sel.innerHTML = CATEGORIES[type].map(c => `<option value="${c}">${c}</option>`).join('');
+  }
+
   async function loadTransactions() {
     const { data, error } = await _sb.from('transactions').select('*').order('date', { ascending: false });
     if (error) { console.error('로드 실패:', error); return; }
-    transactions = data.map(t => ({ id: t.id, date: t.date, desc: t.description, amount: t.amount, type: t.type }));
+    transactions = data.map(t => ({ id: t.id, date: t.date, desc: t.description, amount: t.amount, type: t.type, category: t.category || '' }));
     render();
     renderStats();
   }
@@ -645,6 +659,7 @@
           <td>${t.date}</td>
           <td>${escHtml(t.desc)}</td>
           <td><span class="badge ${t.type}">${t.type === 'income' ? '수입' : '지출'}</span></td>
+          <td style="font-size:0.82rem;color:#a080c0">${escHtml(t.category || '-')}</td>
           <td class="amount-${t.type}">${t.type === 'expense' ? '-' : '+'}${fmt(t.amount)}</td>
           <td><button class="del-btn" data-id="${t.id}" title="삭제">✕</button></td>
         `;
@@ -663,12 +678,14 @@
     if (!desc)              { alert('내용을 입력하세요.'); return; }
     if (!amount || amount <= 0) { alert('올바른 금액을 입력하세요.'); return; }
 
+    const category = document.getElementById('input-category').value;
+
     const { data, error } = await _sb.from('transactions')
-      .insert({ date, description: desc, amount, type })
+      .insert({ date, description: desc, amount, type, category })
       .select().single();
     if (error) { alert('저장 실패: ' + error.message); return; }
 
-    transactions.unshift({ id: data.id, date: data.date, desc: data.description, amount: data.amount, type: data.type });
+    transactions.unshift({ id: data.id, date: data.date, desc: data.description, amount: data.amount, type: data.type, category: data.category || '' });
 
     document.getElementById('input-desc').value   = '';
     document.getElementById('input-amount').value = '';
@@ -934,6 +951,11 @@
   /* ── Init ── */
   const today = isoToday();
   document.getElementById('input-date').value = today;
+
+  updateCategoryOptions('expense');
+  document.getElementById('input-type').addEventListener('change', e => {
+    updateCategoryOptions(e.target.value);
+  });
 
   // 통계 기본값: 최근 3개월
   (() => {
