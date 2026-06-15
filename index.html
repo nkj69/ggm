@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>가계부</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -497,9 +498,13 @@
 </div>
 
 <script>
-  /* ── Storage ── */
-  const STORAGE_KEY = 'ggm_transactions';
-  let transactions = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  /* ── Supabase ── */
+  const _sb = supabase.createClient(
+    'https://ikupiugftbqqmjrnammf.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlrdXBpdWdmdGJxcW1qcm5hbW1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0Nzk4OTEsImV4cCI6MjA5NzA1NTg5MX0.9pa2l6WzBgCbh_depuy5KB-IRISkfSLqZV15CioAH-o'
+  );
+
+  let transactions = [];
 
   /* ── Month state (내역 탭) ── */
   let currentYear, currentMonth;
@@ -515,7 +520,14 @@
   function escHtml(s) {
     return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
-  function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions)); }
+
+  async function loadTransactions() {
+    const { data, error } = await _sb.from('transactions').select('*').order('date', { ascending: false });
+    if (error) { console.error('로드 실패:', error); return; }
+    transactions = data.map(t => ({ id: t.id, date: t.date, desc: t.description, amount: t.amount, type: t.type }));
+    render();
+    renderStats();
+  }
 
   function isoToday() { return new Date().toISOString().split('T')[0]; }
 
@@ -599,7 +611,7 @@
     }
   }
 
-  document.getElementById('add-btn').addEventListener('click', () => {
+  document.getElementById('add-btn').addEventListener('click', async () => {
     const date   = document.getElementById('input-date').value;
     const desc   = document.getElementById('input-desc').value.trim();
     const amount = parseInt(document.getElementById('input-amount').value, 10);
@@ -609,8 +621,12 @@
     if (!desc)              { alert('내용을 입력하세요.'); return; }
     if (!amount || amount <= 0) { alert('올바른 금액을 입력하세요.'); return; }
 
-    transactions.push({ id: Date.now(), date, desc, amount, type });
-    save();
+    const { data, error } = await _sb.from('transactions')
+      .insert({ date, description: desc, amount, type })
+      .select().single();
+    if (error) { alert('저장 실패: ' + error.message); return; }
+
+    transactions.unshift({ id: data.id, date: data.date, desc: data.description, amount: data.amount, type: data.type });
 
     document.getElementById('input-desc').value   = '';
     document.getElementById('input-amount').value = '';
@@ -621,11 +637,13 @@
     render();
   });
 
-  document.getElementById('tx-list').addEventListener('click', e => {
+  document.getElementById('tx-list').addEventListener('click', async e => {
     if (!e.target.classList.contains('del-btn')) return;
     if (!confirm('삭제하시겠습니까?')) return;
-    transactions = transactions.filter(t => t.id !== Number(e.target.dataset.id));
-    save();
+    const id = Number(e.target.dataset.id);
+    const { error } = await _sb.from('transactions').delete().eq('id', id);
+    if (error) { alert('삭제 실패: ' + error.message); return; }
+    transactions = transactions.filter(t => t.id !== id);
     render();
   });
 
@@ -888,7 +906,7 @@
   })();
 
   initMonth();
-  render();
+  loadTransactions();
 </script>
 </body>
 </html>
