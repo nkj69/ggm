@@ -398,6 +398,228 @@
       .form-section, .list-section, .stat-section { margin: 0 12px 16px; }
       #input-date, #input-amount, #input-type { width: 100%; }
     }
+
+    /* ── 고구마마켓 ── */
+    .market-form-wrap {
+      margin: 20px 24px 16px;
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 4px 16px rgba(249,115,22,0.12);
+      border: 2px solid #fed7aa;
+    }
+    .market-form-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0;
+    }
+    .market-form-header h2 { font-size: 0.9rem; font-weight: 800; color: #f97316; }
+
+    .new-post-btn {
+      padding: 8px 18px;
+      background: linear-gradient(135deg, #f97316, #fb923c);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      font-weight: 800;
+      font-family: 'Nunito', 'Noto Sans KR', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 3px 10px rgba(249,115,22,0.3);
+    }
+    .new-post-btn:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(249,115,22,0.4); }
+
+    #market-form-body { margin-top: 16px; }
+
+    .market-input-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .market-input-row input,
+    .market-input-row select {
+      padding: 9px 14px;
+      border: 2px solid #fed7aa;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-family: 'Nunito', 'Noto Sans KR', sans-serif;
+      color: #5a4060;
+      background: #fffbf7;
+      outline: none;
+      transition: border 0.2s, box-shadow 0.2s;
+      width: 100%;
+    }
+    .market-input-row input:focus,
+    .market-input-row select:focus { border-color: #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,0.12); background: white; }
+    .market-input-row input::placeholder { color: #f5c09a; }
+
+    #m-desc {
+      width: 100%;
+      min-height: 86px;
+      resize: vertical;
+      padding: 10px 14px;
+      border: 2px solid #fed7aa;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-family: 'Nunito', 'Noto Sans KR', sans-serif;
+      color: #5a4060;
+      background: #fffbf7;
+      outline: none;
+      margin-bottom: 12px;
+      transition: border 0.2s, box-shadow 0.2s;
+    }
+    #m-desc:focus { border-color: #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,0.12); background: white; }
+    #m-desc::placeholder { color: #f5c09a; }
+
+    .img-upload-zone {
+      border: 2px dashed #fed7aa;
+      border-radius: 16px;
+      padding: 18px 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #fffbf7;
+      margin-bottom: 12px;
+    }
+    .img-upload-zone:hover { border-color: #f97316; background: #fff7ed; }
+    .img-upload-zone .upload-icon { font-size: 1.8rem; display: block; margin-bottom: 4px; }
+    .img-upload-zone p { font-size: 0.82rem; color: #f97316; font-weight: 700; margin: 0; }
+
+    .img-previews { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+
+    .img-preview-item { position: relative; width: 80px; height: 80px; }
+    .img-preview-item img {
+      width: 80px; height: 80px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 2px solid #fed7aa;
+      display: block;
+    }
+    .remove-img {
+      position: absolute;
+      top: -7px; right: -7px;
+      width: 20px; height: 20px;
+      background: #ef4444;
+      color: white;
+      border: 2px solid white;
+      border-radius: 50%;
+      font-size: 0.65rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      line-height: 1;
+      padding: 0;
+    }
+
+    .submit-post-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #f97316, #fb923c);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 800;
+      font-family: 'Nunito', 'Noto Sans KR', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 14px rgba(249,115,22,0.35);
+    }
+    .submit-post-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(249,115,22,0.45); }
+    .submit-post-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    /* 판매글 카드 그리드 */
+    .post-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+      padding: 0 24px 40px;
+    }
+
+    .post-card {
+      background: white;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(249,115,22,0.1);
+      border: 2px solid transparent;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+      cursor: pointer;
+    }
+    .post-card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(249,115,22,0.2); border-color: #fed7aa; }
+
+    .post-card-img-wrap { position: relative; }
+    .post-card-img {
+      width: 100%;
+      aspect-ratio: 4/3;
+      object-fit: cover;
+      display: block;
+    }
+    .post-card-no-img {
+      width: 100%;
+      aspect-ratio: 4/3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #fef3e2, #fff7ed);
+      font-size: 3rem;
+    }
+    .img-count-badge {
+      position: absolute;
+      bottom: 8px; right: 8px;
+      background: rgba(0,0,0,0.48);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    .post-card-body { padding: 12px 14px 14px; }
+    .post-card-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #3b2f20;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .post-card-price { font-size: 1rem; font-weight: 800; color: #f97316; margin-bottom: 8px; }
+    .post-card-meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 4px; }
+    .post-card-cat {
+      font-size: 0.7rem;
+      background: #fff7ed;
+      color: #ea580c;
+      border: 1px solid #fed7aa;
+      border-radius: 8px;
+      padding: 2px 7px;
+      font-weight: 700;
+    }
+    .post-card-loc { font-size: 0.7rem; color: #a08060; }
+    .post-card-date { font-size: 0.68rem; color: #c0a880; }
+
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-size: 0.7rem;
+      font-weight: 800;
+    }
+    .status-badge.selling  { background: #dcfce7; color: #16a34a; }
+    .status-badge.reserved { background: #fef9c3; color: #ca8a04; }
+    .status-badge.sold     { background: #f3f4f6; color: #9ca3af; }
+
+    @media (max-width: 600px) {
+      .market-form-wrap { margin: 12px 12px 12px; }
+      .post-grid { padding: 0 12px 40px; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .market-input-row { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -414,6 +636,7 @@
   <div class="tabs">
     <button class="tab-btn active" data-tab="ledger">내역</button>
     <button class="tab-btn" data-tab="stats">통계</button>
+    <button class="tab-btn" data-tab="market">🍠 마켓</button>
   </div>
 </header>
 
@@ -542,6 +765,52 @@
   </div>
 </div>
 
+<!-- ══════════ 고구마마켓 탭 ══════════ -->
+<div id="page-market" class="page">
+
+  <!-- 판매글 등록 폼 -->
+  <div class="market-form-wrap">
+    <div class="market-form-header">
+      <h2>🍠 고구마마켓</h2>
+      <button class="new-post-btn" id="toggle-form-btn">+ 판매글 쓰기</button>
+    </div>
+    <div id="market-form-body" style="display:none">
+      <div class="market-input-row">
+        <input type="text" id="m-title" placeholder="제목 (예: 거의 새것 에어팟)">
+        <select id="m-category">
+          <option value="">카테고리 선택</option>
+          <option>의류/패션</option>
+          <option>전자기기</option>
+          <option>도서/문구</option>
+          <option>생활용품</option>
+          <option>식품/건강</option>
+          <option>스포츠/레저</option>
+          <option>뷰티/미용</option>
+          <option>기타</option>
+        </select>
+      </div>
+      <div class="market-input-row">
+        <input type="number" id="m-price" placeholder="가격 (원)" min="0">
+        <input type="text" id="m-location" placeholder="거래 장소 (예: 강남역)">
+      </div>
+      <textarea id="m-desc" placeholder="상품 상태, 구매 시기, 사용감 등을 자유롭게 적어주세요."></textarea>
+
+      <div class="img-upload-zone" id="img-upload-zone">
+        <input type="file" id="m-images" multiple accept="image/*" style="display:none">
+        <span class="upload-icon">📷</span>
+        <p>클릭하여 이미지 추가 (최대 5장)</p>
+      </div>
+      <div id="img-previews" class="img-previews"></div>
+
+      <button class="submit-post-btn" id="submit-post-btn">🍠 등록하기</button>
+    </div>
+  </div>
+
+  <!-- 판매글 목록 -->
+  <div id="post-grid" class="post-grid"></div>
+  <div class="empty" id="market-empty" style="display:none">아직 등록된 판매글이 없습니다.</div>
+</div>
+
 <script>
   /* ── Supabase ── */
   const _sb = supabase.createClient(
@@ -611,7 +880,8 @@
       document.getElementById('month-nav').style.visibility =
         btn.dataset.tab === 'ledger' ? 'visible' : 'hidden';
 
-      if (btn.dataset.tab === 'stats') renderStats();
+      if (btn.dataset.tab === 'stats')  renderStats();
+      if (btn.dataset.tab === 'market') loadPosts();
     });
   });
 
@@ -945,6 +1215,170 @@
         </td>
       `;
       tbody.appendChild(tr);
+    });
+  }
+
+  /* ════════════════════════════════
+     고구마마켓
+  ════════════════════════════════ */
+  let selectedFiles = [];
+
+  document.getElementById('toggle-form-btn').addEventListener('click', () => {
+    const body = document.getElementById('market-form-body');
+    const btn  = document.getElementById('toggle-form-btn');
+    const open = body.style.display !== 'none';
+    body.style.display = open ? 'none' : 'block';
+    btn.textContent = open ? '+ 판매글 쓰기' : '✕ 닫기';
+  });
+
+  document.getElementById('img-upload-zone').addEventListener('click', () => {
+    document.getElementById('m-images').click();
+  });
+
+  document.getElementById('m-images').addEventListener('change', e => {
+    const newFiles = Array.from(e.target.files);
+    const remaining = 5 - selectedFiles.length;
+    if (remaining <= 0) { alert('이미지는 최대 5장까지 등록할 수 있습니다.'); return; }
+    selectedFiles = [...selectedFiles, ...newFiles.slice(0, remaining)];
+    renderImgPreviews();
+    e.target.value = '';
+  });
+
+  function renderImgPreviews() {
+    const container = document.getElementById('img-previews');
+    container.innerHTML = '';
+    selectedFiles.forEach((file, idx) => {
+      const url  = URL.createObjectURL(file);
+      const item = document.createElement('div');
+      item.className = 'img-preview-item';
+      item.innerHTML = `<img src="${url}" alt="미리보기"><button class="remove-img" data-idx="${idx}">✕</button>`;
+      container.appendChild(item);
+    });
+    container.querySelectorAll('.remove-img').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        selectedFiles.splice(Number(btn.dataset.idx), 1);
+        renderImgPreviews();
+      });
+    });
+  }
+
+  async function uploadImages(files) {
+    const urls = [];
+    for (const file of files) {
+      const ext      = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      const { data, error } = await _sb.storage
+        .from('market-images')
+        .upload(fileName, file, { cacheControl: '3600', upsert: false });
+      if (error) throw new Error('이미지 업로드 실패: ' + error.message);
+      const { data: urlData } = _sb.storage.from('market-images').getPublicUrl(data.path);
+      urls.push(urlData.publicUrl);
+    }
+    return urls;
+  }
+
+  document.getElementById('submit-post-btn').addEventListener('click', async () => {
+    const title    = document.getElementById('m-title').value.trim();
+    const category = document.getElementById('m-category').value;
+    const price    = parseInt(document.getElementById('m-price').value, 10);
+    const location = document.getElementById('m-location').value.trim();
+    const desc     = document.getElementById('m-desc').value.trim();
+
+    if (!title)             { alert('제목을 입력하세요.'); return; }
+    if (!category)          { alert('카테고리를 선택하세요.'); return; }
+    if (!price || price < 0){ alert('가격을 입력하세요.'); return; }
+    if (!desc)              { alert('상품 설명을 입력하세요.'); return; }
+
+    const btn = document.getElementById('submit-post-btn');
+    btn.disabled = true;
+    btn.textContent = '⏳ 등록 중...';
+
+    try {
+      let image_urls = [];
+      if (selectedFiles.length > 0) {
+        image_urls = await uploadImages(selectedFiles);
+      }
+
+      const { error } = await _sb.from('posts')
+        .insert({ title, description: desc, price, category, location, image_urls, status: 'selling' });
+      if (error) throw new Error('등록 실패: ' + error.message);
+
+      document.getElementById('m-title').value    = '';
+      document.getElementById('m-category').value = '';
+      document.getElementById('m-price').value    = '';
+      document.getElementById('m-location').value = '';
+      document.getElementById('m-desc').value     = '';
+      selectedFiles = [];
+      renderImgPreviews();
+      document.getElementById('market-form-body').style.display = 'none';
+      document.getElementById('toggle-form-btn').textContent = '+ 판매글 쓰기';
+
+      await loadPosts();
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '🍠 등록하기';
+    }
+  });
+
+  async function loadPosts() {
+    const { data, error } = await _sb.from('posts')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) { console.error('판매글 로드 실패:', error); return; }
+    renderPosts(data || []);
+  }
+
+  function relativeDate(iso) {
+    const diff = Date.now() - new Date(iso).getTime();
+    const m = Math.floor(diff / 60000);
+    if (m < 1)  return '방금 전';
+    if (m < 60) return `${m}분 전`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h}시간 전`;
+    const d = Math.floor(h / 24);
+    if (d < 7)  return `${d}일 전`;
+    return new Date(iso).toLocaleDateString('ko-KR');
+  }
+
+  function renderPosts(posts) {
+    const grid  = document.getElementById('post-grid');
+    const empty = document.getElementById('market-empty');
+    grid.innerHTML = '';
+
+    if (posts.length === 0) { empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+
+    const statusLabel = { selling: '판매중', reserved: '예약중', sold: '판매완료' };
+
+    posts.forEach(post => {
+      const imgs = post.image_urls || [];
+      const card = document.createElement('div');
+      card.className = 'post-card';
+
+      const imgHtml = imgs.length > 0
+        ? `<div class="post-card-img-wrap">
+             <img class="post-card-img" src="${escHtml(imgs[0])}" alt="${escHtml(post.title)}" loading="lazy">
+             ${imgs.length > 1 ? `<span class="img-count-badge">📷 ${imgs.length}</span>` : ''}
+           </div>`
+        : `<div class="post-card-no-img">🍠</div>`;
+
+      card.innerHTML = `
+        ${imgHtml}
+        <div class="post-card-body">
+          <div class="post-card-title">${escHtml(post.title)}</div>
+          <div class="post-card-price">₩${post.price.toLocaleString('ko-KR')}</div>
+          <div class="post-card-meta">
+            <span class="status-badge ${post.status || 'selling'}">${statusLabel[post.status] || '판매중'}</span>
+            ${post.category ? `<span class="post-card-cat">${escHtml(post.category)}</span>` : ''}
+          </div>
+          ${post.location ? `<div class="post-card-loc" style="font-size:0.7rem;color:#a08060;margin-top:4px">📍 ${escHtml(post.location)}</div>` : ''}
+          <div class="post-card-date">${relativeDate(post.created_at)}</div>
+        </div>
+      `;
+      grid.appendChild(card);
     });
   }
 
